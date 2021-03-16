@@ -1,0 +1,451 @@
+%%----------------------------导言区--------------------------%%
+%2020年9月13日
+
+\documentclass[UTF8,hyperref]{ctexart}
+\usepackage[a4paper,scale=0.75]{geometry}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lipsum}
+\usepackage{longtable} %默认下longtable本身会被看作一个整体水平居中的整段，且段前段后会有额外的间距，以表示强调
+\usepackage{multirow}
+\usepackage{shortvrb}
+\usepackage{listings}
+\input{listings-stata.tex} %导入Stata的listings配置文件
+
+
+%标题页设置
+\title{LaTeX：listings 宏包的学习与使用}
+\author{王美庭\thanks{王美庭，暨南大学经济与社会研究院，电子信箱：wangmeiting92@gmail.com}} %在独立的提名页中，用致谢命令生成的脚注不附带一条脚注线
+\date{\today}
+
+%新定义命令
+\renewcommand{\lstlistingname}{源程序}
+
+%LaTeX语言全局设置
+\lstset{
+	language={[LaTeX]TeX},
+	basicstyle={\ttfamily},
+	commentstyle={\itshape\color{gray}},
+	keywordstyle={\color{blue}},
+	morekeywords={heiti,multirow,lstdefinelanguage,lstset,color},
+	emph={document,ctexart,tabular,listings,array,morekeywords,morecomment,morestring,language,basicstyle,commentstyle,keywordstyle,stringstyle,emph,breaklines,tabsize,frame,frameround,flexiblecolumns},
+	emphstyle={\color{Purple}},
+	breaklines=true,
+	tabsize=4,
+	frame=trBL,
+	frameround=fttt,
+	flexiblecolumns=true,
+}
+
+%超链接全局设置
+\hypersetup{
+	pdftitle={listings 宏包的学习与使用},
+	pdfauthor={王美庭},
+	colorlinks=true,
+	pdfsubject={这是这个 PDF 的主题，类似于摘要。},
+	pdfkeywords={关键词1, 关键词2, ...},
+	urlcolor={[RGB]{25, 128, 230}},
+	linkcolor={[RGB]{25, 128, 230}}
+}
+
+
+%%----------------------------正文区--------------------------%%
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\thispagestyle{empty}
+
+\newpage
+
+\setcounter{page}{1}
+
+\section{引言}
+这篇文章会首先介绍 LaTeX 自带的抄录命令和环境，由于自带的抄录命令与环境不能实现代码高亮、行号设置等功能，所以我们接下来会介绍 listings 宏包具有更多特色功能的代码抄录命令和环境。虽然 listings 宏包已经支持了很多程序语言的高亮，但仍然还是有一些程序语言被排除在外，所以本文最后部分给出了如何通过 listings 宏包自定义自己心仪的程序语言的方法\footnote{当本文无法解决你的问题时，我们始终相信该宏包说明文档、搜索引擎以及相关的书籍是你最好的学习资料。}。
+
+\section{LaTeX 自带的代码抄录语句和环境}
+单条代码抄录：\verb|\verb<符号><抄录内容><符号>|，即在 \verb|\verb| 之后，起始的符号和末尾的符号一致，两个符号之间的部分将使用打字机字体逐字输出原样输出：
+\begin{flushleft}
+  \verb"\verb|\textsf{Sans serif font family}|"
+  $\rightarrow$
+  \verb|\textsf{Sans serif font family}|
+\end{flushleft}
+宏包 shortvrb 提供了 \verb|\verb| 命令的简写形式，可以使用 \verb|\MakeShortVerb<符号>| 来定义这种简写，以及之后可以用 \verb|\DeleteShortVerb<符号>| 来取消定义，如在导言区定义：
+\begin{verbatim}
+\usepackage{shortvrb}
+\MakeShortVerb|
+\end{verbatim}
+那么就可以使用竖线 \verb!|! 作为简写方式了：
+\MakeShortVerb|
+\begin{flushleft}
+\verb!verbatim |\LaTeX|!
+$\rightarrow$
+verbatim |\LaTeX|
+\end{flushleft}
+\DeleteShortVerb|
+使用带星号的命令 \verb|\verb*| 则可以使输出的空格为可见的 \verb*| | ：
+\begin{flushleft}
+  \verb"\verb*|\textsf{Sans serif font family}|"
+  $\rightarrow$
+  \verb*|\textsf{Sans serif font family}|
+\end{flushleft}
+大段的抄录则可以使用 \verb|verbatim| 环境：
+\begin{flushleft}
+\begin{minipage}{0.38\linewidth}
+\verb|\begin{verbatim}|\\
+\verb|\begin{tabular}{ll}|\\
+\verb|  字体族 & 效果\\|\\
+\verb|  罗马   & \textrm{rmfamily}\\|\\
+\verb|  无衬线 & \textsf{sffamily}\\|\\
+\verb|  打字机 & \texttt{ttfamily}\\|\\
+\verb|\end{tabular}|\\
+\verb|\end{verbatim}|
+\end{minipage}
+$\rightarrow$
+\begin{minipage}{0.45\linewidth}
+\begin{verbatim}
+\begin{tabular}{ll}
+  字体族 & 效果\\
+  罗马   & \textrm{rmfamily}\\
+  无衬线 & \textsf{sffamily}\\
+  打字机 & \texttt{ttfamily}\\
+\end{tabular}
+\end{verbatim}
+\end{minipage}
+\end{flushleft}
+同样，可以使用带星号的 \verb|verbatim*| 环境输出可见空格：
+\begin{flushleft}
+\begin{minipage}{0.38\linewidth}
+\begin{verbatim}
+\begin{verbatim*}
+\begin{tabular}{ll}
+  字体族 & 效果\\
+  罗马   & \textrm{rmfamily}\\
+  无衬线 & \textsf{sffamily}\\
+  打字机 & \texttt{ttfamily}\\
+\end{tabular}
+\end{verbatim*}
+\end{verbatim}
+\end{minipage}
+$\rightarrow$
+\begin{minipage}{0.45\linewidth}
+\begin{verbatim*}
+\begin{tabular}{ll}
+  字体族 & 效果\\
+  罗马   & \textrm{rmfamily}\\
+  无衬线 & \textsf{sffamily}\\
+  打字机 & \texttt{ttfamily}\\
+\end{tabular}
+\end{verbatim*}
+\end{minipage}
+\end{flushleft}
+
+
+\section{listings 宏包加强版的代码抄录命令与环境}
+
+\subsection{语法与选项}
+\label{subsec: syntax and option}
+
+如果我们还要设置代码高亮、行号、背景色等，那 LaTeX 自带的代码抄录语句和环境就不能满足需求了，而 listings 宏包提供的命令和环境可以实现这些需求。其抄录命令的语法如下：
+\begin{flushleft}
+\verb|\lstinline[参数1=选项, 参数2=选项, ...]<符号><抄录内容><符号>|
+\end{flushleft}
+类似于前面 \verb!\verb! 可以定义简写形式，该命令也可以定义简写形式，我们可以通过
+\begin{flushleft}
+\verb!\lstMakeShortInline[参数1=选项, 参数2=选项, ...]<符号>!
+\end{flushleft}
+定义等价抄录符号，也可以通过 \verb!\lstDeleteShortInline<符号>! 取消前面定义的等价抄录符号。另外其抄录环境的语法如下：
+\begin{flushleft}
+\begin{verbatim}
+\begin{lstlisting}[参数1=选项, 参数2=选项, ...]
+    源代码
+\end{lstlisting}
+\end{verbatim}
+\end{flushleft}
+其中常用的参数及其选项如下：
+
+\begin{longtable}{@{}p{0.23\linewidth}p{0.73\linewidth}}
+	\verb|language| & 设置代码所属语言，语法为 \verb|language=[<dialect>]<language>| ，适用语言可查看其宏包文件 \\
+	\verb|basicstyle| & 设置全体的抄录文本字体(可设置字体族、形状、系列、大小、颜色等)。如 \verb|basicstyle={\ttfamily}| \\
+	\verb|commentstyle| & 设置注释文本字体，设置方式同 \verb|basicstyle| \\
+	\verb|keywordstyle| & 设置关键字文本字体，设置方式同 \verb|basicstyle| \\
+	\verb|morekeywords| & 增加系统没有识别的关键词 \\
+	\verb|emph| & 增加要被强调的词，如 \verb|emph={document,ctexart}| \\
+	\verb|emphstyle| & 设置被强调内容的文字格式，设置方式同 \verb|basicstyle| \\
+	\verb|breaklines| & 设置代码是否自动换行，\verb|true| 为真，\verb|false| 为否 \\
+	\verb|alsoletter| & 设置不作为单词分隔符的符号，如 \verb|alsoletter={.}| \\
+	\verb|stringstyle| & 设置字符串的文字格式，设置方式同 \verb|basicstyle| \\
+	\verb|frame| & 边线设置，选项有 \verb|trblTRBL| 的子集、\verb|none|、\verb|leftline|、\verb|topline|、\verb|bottomline|、\verb|lines|、\verb|single|、\verb|shadowbox| \\
+	\verb|frameround| & 设置 frame 的四个角分别为尖角还是圆角，如 \verb|frameround={fttt}| ，将设置右上角为尖角，其余角为圆角 \\
+	\verb|backgroundcolor| & 设置代码背景色，如 \verb|backgroundcolor={\color{yellow!20}}| \\
+	\verb|rulecolor| & 设置 frame 线条颜色，如 \verb|rulecolor={\color{red}}| \\
+	\verb|fillcolor| & 设置文字区到边界第一条线的填充色 \\
+	\verb|rulesepcolor| & 设置第一条线和第二条线之间的填充色 \\
+	\verb|numbers| & 行号位置，选项有 \verb|none|、\verb|left|、\verb|right| \\
+	\verb|numberstyle| & 设置行号数字文本字体，设置方式同 \verb|basicstyle| \\
+	\verb|tabsize| & 设置 tab 所占空格数 \\
+	\verb|title| & 设置标题内容，生成格式为``标题内容'' \\
+	\verb|caption| & 设置标题内容，生成格式为``Listing 序号：标题内容''，可重新定义 \verb|\lstlistingname| 命令以替换标题中的``Listing'' \\
+	\verb|captionpos| & 设置表格的位置，选项有 \verb|t|、\verb|b| \\
+	\verb|framesep| & 控制 listings 和 frame 的距离 \\
+	\verb|framexleftmargin| & 控制 listings 和左边 frame 的距离 \\
+	\verb|framexrightmargin| & 控制 listings 和右边 frame 的距离 \\
+	\verb|framextopmargin| & 控制 listings 和上边 frame 的距离 \\
+	\verb|framexbottommargin| & 控制 listings 和下边 frame 的距离 \\
+	\verb|flexiblecolumns| & \verb|true| 表示将字符非等宽显示，\verb|false| 表示将字符等宽显示 \\
+\end{longtable}
+
+参数除了在使用抄录命令或抄录环境可以被设置之外，还可以在导言区使用 \verb|\lstset| 进行全局设置，其中的可选参数及其选项与前面一致：
+\begin{flushleft}
+\verb|\lstset{参数1=选项，参数2=选项，...}|
+\end{flushleft}
+这里值得注意的是，有些参数只在抄录环境中有效，如 \verb|frame|、\verb|title|、\verb|number|、\verb|backgroundcolor| 等。
+
+
+\subsection{实例 - LaTeX 代码抄录（宏包本身所支持的语言）}
+这里以该宏包所支持的 LaTeX 语言为例，实现代码的高亮展示。我们首先在导言区利用 \verb|\lstset| 进行了一些全局设定：
+%verbatim环境的段落排版模式类似于flushleft环境
+\begin{verbatim}
+% LaTeX 语言全局设置
+\lstset{
+    language={[LaTeX]TeX},
+    basicstyle={\ttfamily},
+    commentstyle={\itshape\color{gray}},
+    keywordstyle={\color{blue}},
+    morekeywords={heiti,multirow,lstdefinelanguage,lstset,color},
+    emph={document,ctexart,tabular,listings,array},
+    emphstyle={\color{Purple}},
+    breaklines=true,
+    tabsize=4,
+    frame=trBL,
+    frameround=fttt,
+    flexiblecolumns=true,
+}
+\end{verbatim}
+然后在使用抄录命令或抄录环境时我们还可以进行一些额外的设定（如果有需要的话）。首先我们使用抄录命令 \verb|\lstinline| 查看效果：
+\begin{flushleft}
+\verb!\lstinline|\multicolumn{2}{c}{some texts}|! $\rightarrow$ \lstinline|\multicolumn{2}{c}{some texts}| \\
+\verb!\lstinline|\multirow{2}*{some texts}|! $\rightarrow$ \lstinline|\multirow{2}*{some texts}| \\
+\verb!\lstinline|\textsf{This is a sentence.}|! $\rightarrow$ \lstinline|\textsf{This is a sentence.}|
+\end{flushleft}
+然后再使用抄录环境 \verb|lstlisting| 查看效果：
+\begin{center}
+\begin{verbatim}
+\begin{lstlisting}
+\begin{tabular}{|l|l|}
+    \hline
+    \heiti 字体族 & \heiti 效果                     \\\hline
+    罗马          & \textrm{Roman font family}      \\\hline
+    无衬线        & \textsf{Sans serif font family} \\\hline
+    打字机        & \texttt{Typewriter font family} \\\hline
+\end{tabular}
+\end{lstlisting}
+\end{verbatim}
+$\downarrow$ \\[0.25em]
+\begin{lstlisting}
+\begin{tabular}{|l|l|}
+	\hline
+	\heiti 字体族 & \heiti 效果                     \\\hline
+	罗马          & \textrm{Roman font family}      \\\hline
+	无衬线        & \textsf{Sans serif font family} \\\hline
+	打字机        & \texttt{Typewriter font family} \\\hline
+\end{tabular}
+\end{lstlisting}
+\end{center}
+最后，我们来抄录一份比较完整的 LaTeX 代码：
+\begin{verbatim}
+\begin{lstlisting}
+%The introduction area(导言区)
+\documentclass[UTF8]{ctexart}
+\usepackage{array}
+\usepackage{listings}
+
+%The body area(正文区)
+\begin{document}
+    \section{英文字体}
+    \begin{tabular}{ll}
+        \heiti 字体族 & \heiti 效果                     \\
+        罗马          & \textrm{Roman font family}      \\
+        无衬线        & \textsf{Sans serif font family} \\
+        打字机        & \texttt{Typewriter font family}
+    \end{tabular}
+
+    This is a sentence about English.
+
+    这是一句中文（在 ttfamily 中，中文字体变成了仿宋）。
+\end{document}
+\end{lstlisting}
+\end{verbatim}
+\begin{center} $\downarrow$ \end{center}
+\begin{lstlisting}
+% The introduction area（导言区）
+\documentclass[UTF8]{ctexart}
+\usepackage{array}
+\usepackage{listings}
+
+% The body area（正文区）
+\begin{document}
+\section{英文字体}
+\begin{tabular}{ll}
+	\heiti 字体族 & \heiti 效果                     \\
+	罗马          & \textrm{Roman font family}      \\
+	无衬线        & \textsf{Sans serif font family} \\
+	打字机        & \texttt{Typewriter font family}
+\end{tabular}
+
+This is a sentence about English.
+
+这是一句中文（在 ttfamily 中，中文字体变成了仿宋）。
+\end{document}
+\end{lstlisting}
+
+\subsection{实例 - Stata 代码抄录（宏包本身不支持的语言）}
+肯定有读者发现了，这么好用的宏包竟然不支持 Stata 语言的代码，那就自己定义一个吧。过程还是很简单的，如下面所示\footnote{不像前面，从这里开始，所有的 LaTeX 代码都将进入高亮模式。前面之所以黑白模式和高亮模式交替进行，是为了让读者能更好的理解 listings 宏包的运作方式。}：
+\begin{lstlisting}
+\lstdefinelanguage{Stata}{
+	% 首要关键字
+	morekeywords=[1]{regress, reg, summarize, sum, ...}, %定义一级关键字
+	% 函数关键字
+	morekeywords=[2]{ustrregexm, ustrregexra, ...}, %定义二级关键字
+	% 注释
+	morecomment=[l]{//}, %定义\\之后为注释语句
+	morecomment=[s]{/*}{*/}, %定义/*和*/之间为注释语句
+	morecomment=[f][\itshape\color{gray}][0]{*}, %当*在首列时，为注释
+	morecomment=[f][\itshape\color{gray}][1]{*}, %当*在第二列时，为注释
+	morecomment=[f][\itshape\color{gray}][2]{*}, %当*在第三列时，为注释
+	% 字符串
+	morestring=[s]{`}{'}, %定义`和'之间为字符串，下面类似
+	morestring=[s]{"}{"},
+	morestring=[s]{"`}{'"},
+	morestring=[s]{`"`}{'"'},
+}
+\end{lstlisting}
+
+在这里的 Stata 语言定义中，我们将最经常用的 \verb|regress| 、\verb|summarize| 等定义为一级关键字，将常用的函数（含矩阵函数、数学函数、字符串函数等）定义为二级关键字。另外，这里之所以将宏（也称展元）定义为字符串，是因为该宏包中没有额外的办法来专门设定宏了\footnote{如果读者不喜欢这条设定，则删除对应条目即可。个人之所以这么设定，是因为这样做还是可以让宏代码起到一定的突出效果。}。
+
+Stata 语言的完全体定义见个人提供的 listings-stata.tex 文件\footnote{里面肯定还有很多关键字和函数是没有的，有兴趣的读者可以自行添加，打造属于自己的 listings-stata.tex 文件。}，读者只需将其放在当前目录下，并在主文件导言区使用 \lstinline[alsoletter={-}]|\input{listings-stata.tex}| 将其导入即可。之后的操作就和使用 listings 内置的程序语言一样了。
+
+首先在导言区利用 \lstinline|\lstset| 进行全局设置：
+\begin{lstlisting}
+% Stata 语言全局设置
+\lstset{
+	language=Stata,
+	basicstyle={\ttfamily},
+	commentstyle={\itshape\color{gray}}, %设置注释的文字格式
+	keywordstyle={[1]\color{Magenta}}, %设置首要关键字的文字格式
+	keywordstyle={[2]\color{blue}}, %设置函数关键字的文字格式
+	stringstyle={\color{Purple}}, %设置字符串的文字格式
+	emph={}, %使前面 LaTeX 语言所设定的 emph 失效
+	breaklines=true,
+	tabsize=4,
+	frame=trBL,
+	frameround=fttt,
+	flexiblecolumns=true,
+}
+\end{lstlisting}
+
+%Stata语言全局设置
+\lstset{
+	language=Stata,
+	basicstyle={\ttfamily},
+	commentstyle={\itshape\color{gray}}, %设置注释的文字格式
+	keywordstyle={[1]\color{Magenta}}, %设置首要关键字的文字格式
+	keywordstyle={[2]\color{blue}}, %设置函数关键字的文字格式
+	stringstyle={\color{Purple}}, %设置字符串的文字格式
+	emph={}, %使前面LaTeX语言所设定的emph失效
+	breaklines=true,
+	tabsize=4,
+	frame=trBL,
+	frameround=fttt,
+	flexiblecolumns=true,
+}
+
+然后就可以让 Stata 的代码在 LaTeX 排版中高亮起来了，比如命令行高亮\footnote{这里没有直接给出抄录命令或抄录环境源码，其语法与选项参见 \ref{subsec: syntax and option} 节，下同。}：
+\begin{flushleft}
+\lstinline|matrix define A = matuniform(3,3)|
+\end{flushleft}
+命令块高亮：
+\begin{lstlisting}
+* This is the comment（这是注释）
+ * This is the comment（这是注释）
+  * This is the comment（这是注释）
+sysuse auto.dta, clear
+sum price mpg weight trunk //This is the comment at the end of the sentence
+ttest price, by(foreign)
+corr price mpg weight trunk //求相关系数
+reg price mpg trunk weight
+logit foreign price mpg displacement
+
+* 矩阵运算
+mat define A = (1,2,3\4,5,6\7,8,9)
+mat rownames A = row1 row2 row3
+mat B = J(3,3,1)
+mat C = A * B
+/*
+这是多行注释。
+There are multiple lines of comments here.
+*/
+
+* 字符串处理
+local aa "This is a string"
+local bb = ustrregexra("`xx'","\w{4}","")
+local cc = ustrregexra(`"`xx'"',"\w{2}","")
+
+* 循环程序显示拆分的字符串
+local xx "This is a string"
+tokenize `xx'
+local i = 1
+while "``i''" != "" {
+	dis in y "``i++''"
+}
+
+* 循环程序求和
+local sum_i = 0
+forvalues i = 1/100 {
+	local sum_i = `sum_i' + `i'
+}
+dis in y `sum_i'
+\end{lstlisting}
+
+这样设置了一下之后，感觉在 LaTeX 中排版的代码看起来顺眼多了。
+
+\subsection{其他注意事项}
+
+%LaTeX语言全局设置
+\lstset{
+	language={[LaTeX]TeX},
+	basicstyle={\ttfamily},
+	commentstyle={\itshape\color{gray}},
+	keywordstyle={\color{blue}},
+	morekeywords={heiti,multirow,lstdefinelanguage,lstset,color},
+	emph={document,ctexart,tabular,listings,array,morekeywords,morecomment,morestring,language,basicstyle,commentstyle,keywordstyle,stringstyle,emph,breaklines,tabsize,frame,frameround,flexiblecolumns},
+	emphstyle={\color{Purple}},
+	breaklines=true,
+	tabsize=4,
+	frame=trBL,
+	frameround=fttt,
+	flexiblecolumns=true,
+}
+
+在对 \lstinline|\lstset| 进行设置时，还有一些其他要注意的细节：
+\begin{itemize}
+	\item 在同一篇文章中，一种语言定义的 \verb|morekeywords| 不会影响对另外一种语言的 \verb|keywords| 产生影响。如在同一篇文章中，LaTeX 语言额外定义了 \verb|multirow| 为关键字，则这个关键字只会在 LaTeX 语言的抄录中高亮，而不会在 Matlab 语言的抄录中高亮。
+	\item 在同一篇文章中，一种语言定义的 \verb|emph| 会影响到另外一种语言。如在同一篇文章中，LaTeX 语言定义了 \verb|tabular| 为强调词语，则这个强调词语会过渡到下一个语言。当然，我们一般不愿意看到这样的结果，此时我们只需对 \verb|emph| 进行重新设定即可。之所以可以这么做，是因为对于那些可以传递的参数，后面\lstset{}的设置，会替换前面\lstset{}对于相同参数的设置。
+	\item \verb|morekeywords| 需要和 \verb|language| 放在一起，否则会失效(无论是针对自定义的还是现有的语言)。当然，在抄录命令和抄录环境中的局部 \verb|morekeywords| 设定不受此影响。
+\end{itemize}
+
+
+
+
+\section*{参考资料}
+\addcontentsline{toc}{section}{参考资料} %将其添加进目录
+\markright{参考资料} %将其添加进页眉
+\noindent
+\href{https://www.ctan.org/pkg/listings}{CTAN: listings – Typeset source code listings using \LaTeX{}} \\
+\href{https://github.com/satejsoman/stata-lstlisting}{GitHub: satejsoman/stata-lstlisting} \\
+\href{https://gist.github.com/mcaceresb/b40d6059cf66cc73423f4ddf3f72acda}{GIST-GitHub: mcaceresb/listings-stata.tex} \\
+刘海洋：《\LaTeX{} 入门》，第 2.2.5 节，抄录与代码环境 \\
+胡伟：《\LaTeXe{} 完全学习手册（第二版）》，第 2.11.9 节，抄录环境和命令
+
+\end{document}
